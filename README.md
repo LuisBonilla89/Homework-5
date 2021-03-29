@@ -20,8 +20,6 @@ The purpose of this assignment was to create a work day scheduler utilising Java
 
 Please click on the following link for application:
 
-https://luisbonilla89.github.io/Homework-5/
-
 # Licence
 
 MIT
