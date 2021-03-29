@@ -60,13 +60,13 @@ function clearLocalStorage() {
 
 //The following function will save events in the local storage
 
-function saveEvents(input, time) {
+function saveEvents(time, input) {
   alert("Your event has been saved!!");
   savedData.push({ time: time, event: input });
   localStorage.setItem("savedData", JSON.stringify(savedData));
 }
 
-function deleteEvent(index) {
+function removeEvents(index) {
   savedData.splice([index], 1);
   arrayData.splice([index], 1);
 }
@@ -74,7 +74,7 @@ function deleteEvent(index) {
 function clearEvent(clearDone, index, location, buttonEl) {
   if (clearDone) {
     alert("You have removed the event");
-    deleteEvent(index);
+    removeEvents(index);
     buttonEl.attr("data-event", "none");
     localStorage.setItem("savedData", JSON.stringify(savedData));
   } else {
@@ -111,16 +111,16 @@ function newEvents(index, time, location, buttonEl, fullSlot, eventEntry) {
     }
   } else if (eventEntry.trim() !== "" && fullSlot === "yes") {
     if (savedData[index].event !== eventEntry) {
-      var savedVal = confirm(
+      var savedConf = confirm(
         "Do you want to change the event from '" +
           savedData[index].event +
           "' to '" +
           eventEntry +
           "'?"
       );
-      if (savedVal) {
-        deleteEvent(index);
-        saveEvents(eventEntry, time);
+      if (savedConf) {
+        removeEvents(index);
+        saveEvents(time, eventEntry);
       } else {
         alert("The change was not saved.");
         location.val(savedData[index].event);
@@ -134,19 +134,20 @@ $(".time-block").on("button", "click", function () {
   var eventEntry = $(this).siblings("textarea").val();
   var time = $(this).siblings("p").text();
   var location = $(this).siblings("textarea");
-  var fullSlot = $(this).attr("data-event").val();
+  var fullSlot = $(this).attr("data-event");
   var index = arrayData.indexOf(time);
   var buttonEl = $(this);
 
-  changeEvent(eventEntry, time, location, fullSlot, index, buttonEl);
+  newEvents(eventEntry, time, location, fullSlot, index, buttonEl);
   events();
 });
 
-//Color-coding
+//Color-coding the time blocks
 
 var timeOftheDay = moment().format("hA");
 
 var allTimeBlocksEle = $(".time-block");
+
 for (i = 0; i < allTimeBlocksEle.length; i++) {
   var timeBlock = $(allTimeBlocksEle[i]);
   var timeBlockId = timeBlock.attr("id");
