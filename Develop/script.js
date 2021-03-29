@@ -71,11 +71,11 @@ function deleteEvent(index) {
   arrayData.splice([index], 1);
 }
 
-function clearEvent(clearDone, index, location, button) {
+function clearEvent(clearDone, index, location, buttonEl) {
   if (clearDone) {
     alert("You have removed the event");
-    removeEvent(index);
-    button.attr("data-event", "none");
+    deleteEvent(index);
+    buttonEl.attr("data-event", "none");
     localStorage.setItem("savedData", JSON.stringify(savedData));
   } else {
     location.val(savedData[index].event);
@@ -83,8 +83,79 @@ function clearEvent(clearDone, index, location, button) {
   }
   console.log(
     "The event is set to " +
-      button.attr("data-event") +
+      buttonEl.attr("data-event") +
       " at " +
-      button.sibblings("p").text()
+      buttonEl.sibblings("p").text()
   );
+}
+
+function newEvents(index, time, location, buttonEl, fullSlot, eventEntry) {
+  //using .trim() to remove unwanted spacing when entering the input on a desired block
+  if (eventEntry.trim() === "" && fullSlot === "yes") {
+    var savedConf = confirm(
+      ": Do you want to clear the event '" +
+        savedData[index].event +
+        "scheduled for " +
+        time +
+        "'?"
+    );
+    clearEvent(savedConf, index, location, buttonEl);
+  } else if (eventEntry.trim() !== "" && fullSlot === "none") {
+    var savedConf = confirm(
+      ": Do you want to add the event '" + eventEntry + "for " + time + "'?"
+    );
+    if (savedConf) {
+      saveEvents(time, eventEntry);
+    } else {
+      location.val("");
+    }
+  } else if (eventEntry.trim() !== "" && fullSlot === "yes") {
+    if (savedData[index].event !== eventEntry) {
+      var savedVal = confirm(
+        "Do you want to change the event from '" +
+          savedData[index].event +
+          "' to '" +
+          eventEntry +
+          "'?"
+      );
+      if (savedVal) {
+        deleteEvent(index);
+        saveEvents(eventEntry, time);
+      } else {
+        alert("The change was not saved.");
+        location.val(savedData[index].event);
+      }
+    }
+  }
+}
+
+$(".time-block").on("button", "click", function () {
+  event.preventDefault();
+  var eventEntry = $(this).siblings("textarea").val();
+  var time = $(this).siblings("p").text();
+  var location = $(this).siblings("textarea");
+  var fullSlot = $(this).attr("data-event").val();
+  var index = arrayData.indexOf(time);
+  var buttonEl = $(this);
+
+  changeEvent(eventEntry, time, location, fullSlot, index, buttonEl);
+  events();
+});
+
+//Color-coding
+
+var timeOftheDay = moment().format("hA");
+
+var allTimeBlocksEle = $(".time-block");
+for (i = 0; i < allTimeBlocksEle.length; i++) {
+  var timeBlock = $(allTimeBlocksEle[i]);
+  var timeBlockId = timeBlock.attr("id");
+  var tbText = timeBlock.children(".row").children("textarea");
+  if (timeBlockId === timeOftheDay) {
+    tbText.addClass("present");
+  } else if (moment(timeBlockId, "hA").isBefore()) {
+    tbText.addClass("past");
+  } else if (moment(timeBlockId, "hA").isAfter()) {
+    tbText.addClass("future");
+  }
 }
